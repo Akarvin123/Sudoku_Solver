@@ -5,7 +5,7 @@
 #include <set>
 #include <chrono> 
 #include <climits>
-#define  ui uint8_t
+#define is_present(x,element) (x).find((element))==(x).end()
 using namespace std;
 int check_fill(vector<vector<int> > &v){
     for(int i = 0;i<9;i++)
@@ -49,10 +49,10 @@ map<pair<int,int>,vector<int> > get_domain(vector<vector<int> > &v){
             int pos_block = (((int)(x/3))*3 + y/3);
             if(v[i][j]==0)
             for(int fill = 1;fill<=9;fill++){
-                if(binary_search(block[pos_block].begin(),block[pos_block].end(),fill)) continue;
-                if(binary_search(row[fill].begin(),row[fill].end(),x)) continue;
-                if(binary_search(column[fill].begin(),column[fill].end(),y)) continue;
-                m[make_pair(i,j)].push_back(fill);
+                if(is_present(block[pos_block],fill)&&is_present(row[fill],x)&&is_present(column[fill],y)) 
+                    {
+                         m[make_pair(i,j)].push_back(fill);
+                    }
             }
         }
     }
@@ -94,35 +94,37 @@ int solve(vector<vector<int> > v){
     }
     map<pair<int,int>,vector<int> > domain = get_domain(v);
     pair<int,int> p = get_min(domain);
+   
     for(auto i:domain[p]){
         vector<vector<int> > temp  = v;
         temp[p.first][p.second] = i;
-        int p  = solve(temp); 
-        if(p==1) return 1;
+        return solve(temp);
     }
+    return 0;
 
 }
 int main(){
     vector<vector<int> > v(9);
-    cout << "Enter {0, [1-9]: filled} \n";
+    cout << "Enter { [0] - Empty Cell , [1-9]: filled} \n";
     for(int i = 0;i<9;i++){
         v[i].resize(9);
         for(int j =0 ;j<9;j++){
             cin >> v[i][j];
         }
-
     }
     cout << endl << endl;
     auto start_time = chrono::high_resolution_clock::now();
     solve(v);
+    cout << endl;
     auto end_time = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(end_time-start_time).count();
-    cout << duration/1000000.00;
-    exit(0);
+    cout  << "Time Taken : " << duration/1000000.00 << "s" << endl;
+    return 0;
 
 }
 
 /*
+Test Cases: 
 9 2 0 8 0 0 0 4 0 
 0 0 1 3 4 0 0 0 6
 4 0 3 0 5 6 8 0 0 
@@ -153,13 +155,14 @@ int main(){
 0 7 0 0 5 0 0 2 8
 0 8 0 0 0 9 7 6 0
 
-0 0 8 0 0 0 4 0 2
-0 0 0 3 2 0 7 8 0
-7 0 2 5 0 6 0 0 0
-0 0 3 0 5 0 0 0 4
-0 0 9 7 4 0 2 0 0 
-0 0 6 2 0 0 0 0 0
-0 0 0 0 0 0 5 0 0
-9 0 0 0 0 5 6 0 0
-6 2 0 0 0 0 1 9 0
+2 0 0 0 7 0 3 0 0
+7 0 3 9 1 6 0 0 0
+0 0 6 0 8 0 1 5 0
+0 0 1 0 9 4 0 0 0 
+0 0 0 1 0 0 0 0 0 
+0 0 0 0 2 0 8 0 0
+0 6 2 0 0 0 4 0 5
+0 7 0 0 5 0 0 2 8
+0 8 0 0 0 9 7 6 0
+
 */
